@@ -1,4 +1,4 @@
-const {formatMessage, ArgumentType, BlockType, ProgramModeType, CommonPeripheral} = window.Scratch;
+const {formatMessage, ArgumentType, BlockType, ProgramModeType, ArduinoPeripheral} = window.Scratch;
 
 /**
  * The list of USB device filters.
@@ -134,15 +134,14 @@ const DataType = {
 /**
  * Manage communication with a Arduino esp32 peripheral over a OpenBlock Link client socket.
  */
-class ArduinoEsp32 extends CommonPeripheral{
+class ArduinoEsp32 extends ArduinoPeripheral {
     /**
      * Construct a Arduino communication object.
      * @param {Runtime} runtime - the OpenBlock runtime
      * @param {string} deviceId - the id of the extension
-     * @param {string} originalDeviceId - the original id of the peripheral, like xxx_arduinoUno
      */
-    constructor (runtime, deviceId, originalDeviceId) {
-        super(runtime, deviceId, originalDeviceId, PNPID_LIST, SERIAL_CONFIG, DIVECE_OPT);
+    constructor (runtime, deviceId) {
+        super(runtime, deviceId, PNPID_LIST, SERIAL_CONFIG, DIVECE_OPT);
     }
 }
 
@@ -742,9 +741,8 @@ class OpenBlockArduinoEsp32Device {
     /**
      * Construct a set of Arduino blocks.
      * @param {Runtime} runtime - the OpenBlock runtime.
-     * @param {string} originalDeviceId - the original id of the peripheral, like xxx_arduinoUno
      */
-    constructor (runtime, originalDeviceId) {
+    constructor (runtime) {
         /**
          * The OpenBlock runtime.
          * @type {Runtime}
@@ -752,7 +750,7 @@ class OpenBlockArduinoEsp32Device {
         this.runtime = runtime;
 
         // Create a new Arduino esp32 peripheral instance
-        this._peripheral = new ArduinoEsp32(this.runtime, this.DEVICE_ID, originalDeviceId);
+        this._peripheral = new ArduinoEsp32(this.runtime, this.DEVICE_ID);
     }
 
     /**
@@ -815,9 +813,9 @@ class OpenBlockArduinoEsp32Device {
                         }
                     },
                     {
-                        opcode: 'esp32SetPwmOutput',
+                        opcode: 'setPwmOutput',
                         text: formatMessage({
-                            id: 'arduinoEsp32.pins.esp32SetPwmOutput',
+                            id: 'arduinoEsp32.pins.setPwmOutput',
                             default: 'set pwm pin [PIN] out [OUT]',
                             description: 'arduinoEsp32 set pwm pin out'
                         }),
@@ -836,9 +834,9 @@ class OpenBlockArduinoEsp32Device {
                     },
                     {
 
-                        opcode: 'esp32SetDACOutput',
+                        opcode: 'setDACOutput',
                         text: formatMessage({
-                            id: 'arduinoEsp32.pins.esp32SetDACOutput',
+                            id: 'arduinoEsp32.pins.setDACOutput',
                             default: 'set dac pin [PIN] out [OUT]',
                             description: 'arduinoEsp32 set dac pin out'
                         }),
@@ -889,9 +887,9 @@ class OpenBlockArduinoEsp32Device {
                         }
                     },
                     {
-                        opcode: 'esp32ReadTouchPin',
+                        opcode: 'readTouchPin',
                         text: formatMessage({
-                            id: 'arduinoEsp32.pins.esp32ReadTouchPin',
+                            id: 'arduinoEsp32.pins.readTouchPin',
                             default: 'read touch pin [PIN]',
                             description: 'arduinoEsp32 read touch pin'
                         }),
@@ -907,9 +905,9 @@ class OpenBlockArduinoEsp32Device {
                     '---',
                     {
 
-                        opcode: 'esp32SetServoOutput',
+                        opcode: 'setServoOutput',
                         text: formatMessage({
-                            id: 'arduinoEsp32.pins.esp32SetServoOutput',
+                            id: 'arduinoEsp32.pins.setServoOutput',
                             default: 'set servo pin [PIN] out [OUT]',
                             description: 'arduinoEsp32 set servo pin out'
                         }),
@@ -929,9 +927,9 @@ class OpenBlockArduinoEsp32Device {
                     '---',
                     {
 
-                        opcode: 'esp32AttachInterrupt',
+                        opcode: 'attachInterrupt',
                         text: formatMessage({
-                            id: 'arduinoEsp32.pins.esp32AttachInterrupt',
+                            id: 'arduinoEsp32.pins.attachInterrupt',
                             default: 'attach interrupt pin [PIN] mode [MODE] executes',
                             description: 'arduinoEsp32 attach interrupt'
                         }),
@@ -952,9 +950,9 @@ class OpenBlockArduinoEsp32Device {
                     },
                     {
 
-                        opcode: 'esp32DetachInterrupt',
+                        opcode: 'detachInterrupt',
                         text: formatMessage({
-                            id: 'arduinoEsp32.pins.esp32DetachInterrupt',
+                            id: 'arduinoEsp32.pins.detachInterrupt',
                             default: 'detach interrupt pin [PIN]',
                             description: 'arduinoEsp32 detach interrupt'
                         }),
@@ -967,6 +965,134 @@ class OpenBlockArduinoEsp32Device {
                             }
                         },
                         programMode: [ProgramModeType.UPLOAD]
+                    },
+                    // Legacy aliases, kept for backward compatibility.
+                    {
+                        opcode: 'esp32SetPwmOutput',
+                        text: formatMessage({
+                            id: 'arduinoEsp32.pins.setPwmOutput',
+                            default: 'set pwm pin [PIN] out [OUT]',
+                            description: 'arduinoEsp32 set pwm pin out'
+                        }),
+                        blockType: BlockType.COMMAND,
+                        arguments: {
+                            PIN: {
+                                type: ArgumentType.STRING,
+                                menu: 'outPins',
+                                defaultValue: Pins.IO4
+                            },
+                            OUT: {
+                                type: ArgumentType.UINT8_NUMBER,
+                                defaultValue: '255'
+                            }
+                        },
+                        hideFromPalette: true,
+                        func: 'setPwmOutput'
+                    },
+                    {
+                        opcode: 'esp32SetDACOutput',
+                        text: formatMessage({
+                            id: 'arduinoEsp32.pins.setDACOutput',
+                            default: 'set dac pin [PIN] out [OUT]',
+                            description: 'arduinoEsp32 set dac pin out'
+                        }),
+                        blockType: BlockType.COMMAND,
+                        arguments: {
+                            PIN: {
+                                type: ArgumentType.STRING,
+                                menu: 'dacPins',
+                                defaultValue: Pins.IO25
+                            },
+                            OUT: {
+                                type: ArgumentType.UINT8_NUMBER,
+                                defaultValue: '0'
+                            }
+                        },
+                        hideFromPalette: true,
+                        func: 'setDACOutput'
+                    },
+                    {
+                        opcode: 'esp32ReadTouchPin',
+                        text: formatMessage({
+                            id: 'arduinoEsp32.pins.readTouchPin',
+                            default: 'read touch pin [PIN]',
+                            description: 'arduinoEsp32 read touch pin'
+                        }),
+                        blockType: BlockType.REPORTER,
+                        arguments: {
+                            PIN: {
+                                type: ArgumentType.STRING,
+                                menu: 'touchPins',
+                                defaultValue: Pins.IO4
+                            }
+                        },
+                        hideFromPalette: true,
+                        func: 'readTouchPin'
+                    },
+                    {
+                        opcode: 'esp32SetServoOutput',
+                        text: formatMessage({
+                            id: 'arduinoEsp32.pins.setServoOutput',
+                            default: 'set servo pin [PIN] out [OUT]',
+                            description: 'arduinoEsp32 set servo pin out'
+                        }),
+                        blockType: BlockType.COMMAND,
+                        arguments: {
+                            PIN: {
+                                type: ArgumentType.STRING,
+                                menu: 'outPins',
+                                defaultValue: Pins.IO4
+                            },
+                            OUT: {
+                                type: ArgumentType.HALF_ANGLE,
+                                defaultValue: '90'
+                            }
+                        },
+                        hideFromPalette: true,
+                        func: 'setServoOutput'
+                    },
+                    {
+                        opcode: 'esp32AttachInterrupt',
+                        text: formatMessage({
+                            id: 'arduinoEsp32.pins.attachInterrupt',
+                            default: 'attach interrupt pin [PIN] mode [MODE] executes',
+                            description: 'arduinoEsp32 attach interrupt'
+                        }),
+                        blockType: BlockType.CONDITIONAL,
+                        arguments: {
+                            PIN: {
+                                type: ArgumentType.STRING,
+                                menu: 'pins',
+                                defaultValue: Pins.IO4
+                            },
+                            MODE: {
+                                type: ArgumentType.STRING,
+                                menu: 'interruptMode',
+                                defaultValue: InterrupMode.Rising
+                            }
+                        },
+                        programMode: [ProgramModeType.UPLOAD],
+                        hideFromPalette: true,
+                        func: 'attachInterrupt'
+                    },
+                    {
+                        opcode: 'esp32DetachInterrupt',
+                        text: formatMessage({
+                            id: 'arduinoEsp32.pins.detachInterrupt',
+                            default: 'detach interrupt pin [PIN]',
+                            description: 'arduinoEsp32 detach interrupt'
+                        }),
+                        blockType: BlockType.COMMAND,
+                        arguments: {
+                            PIN: {
+                                type: ArgumentType.STRING,
+                                menu: 'pins',
+                                defaultValue: Pins.IO4
+                            }
+                        },
+                        programMode: [ProgramModeType.UPLOAD],
+                        hideFromPalette: true,
+                        func: 'detachInterrupt'
                     }
                 ],
                 menus: {
